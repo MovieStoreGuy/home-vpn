@@ -1,0 +1,45 @@
+version: '2.4'
+
+networks:
+  internal:
+    driver: bridge
+
+services:
+  ldap-service:
+    build: 
+      context: '.'
+      dockerfile: 'slapd-server.Dockerfile'
+    depends_on:
+      - database
+    ports:
+      - '389:389'
+    environment:
+      - LDAP_ROOT_DOMAIN="dc=moviestoreguy,dc=me"
+      - LDAP_ROOT_PASSWORD=derpderp
+      - LOG_LEVEL=256
+      - DATABASE_HOST=backend-store
+      - DATABASE_NAME=users
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=localdevpass
+  database:
+    image: postgres:12.1-alpine
+    networks:
+      internal:
+        aliases:
+          - backend-store
+          - database
+          - postgres
+    expose:
+      - '8080'
+    environment:
+      - POSTGRES_PASSWORD=localdevpass
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+    # Persistent store for the data
+    - type: volume
+      source: db-data
+      target: /var/lib/postgresql/data/pgdata
+
+
+volumes:
+  db-data:

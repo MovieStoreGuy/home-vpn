@@ -1,7 +1,7 @@
 # Link to documentation: https://www.terraform.io/docs/providers/do/index.html
 # Link to repo: https://github.com/terraform-providers/terraform-provider-digitalocean
 provider "digitalocean" {
-  token = "${var.token}"
+  token = var.do-token
 
   version = "v1.12.0"
 }
@@ -9,8 +9,8 @@ provider "digitalocean" {
 # Adding local ssh key to Digital Ocean (assuming this is to be run on a local machine)
 # Or run as though it was a local machine within CIs
 resource "digitalocean_ssh_key" "configuring_key" {
-  name       = "${var.ssh_key_name}"
-  public_key = "${file("~/.ssh/id_rsa.pub")}"
+  name       = var.ssh_key_name
+  public_key = file("~/.ssh/id_rsa.pub")
 }
 
 resource "digitalocean_project" "home-vpn" {
@@ -20,9 +20,9 @@ resource "digitalocean_project" "home-vpn" {
   environment = "development"
 
   resources = [
-    "${digitalocean_droplet.home-vpn.urn}",
-    "${digitalocean_floating_ip.home-vpn.urn}",
-    "${digitalocean_domain.home-vpn.urn}",
+    digitalocean_droplet.home-vpn.urn,
+    digitalocean_floating_ip.home-vpn.urn,
+    digitalocean_domain.home-vpn.urn,
   ]
 }
 
@@ -36,29 +36,29 @@ resource "digitalocean_droplet" "home-vpn" {
   size   = "s-1vcpu-2gb" # Size definitions can be found here: https://developers.digitalocean.com/documentation/v2/#list-all-sizes
 
   private_networking = true # Allows this droplet to communicate with other droplets in the same region on the same account
-  ssh_keys           = ["${digitalocean_ssh_key.configuring_key.fingerprint}"]
-  tags               = "${concat(var.tags, "home-vpn")}"
+  ssh_keys           = [digitalocean_ssh_key.configuring_key.fingerprint]
+  tags               = concat(var.tags, ["home-vpn"])
 }
 
 resource "digitalocean_domain" "home-vpn" {
-  name       = "${var.domain}"
-  ip_address = "${digitalocean_floating_ip.home-vpn.ip_address}"
+  name       = var.domain
+  ip_address = digitalocean_floating_ip.home-vpn.ip_address
 }
 
 
 resource "digitalocean_floating_ip" "home-vpn" {
-  region     = "${digitalocean_droplet.home-vpn.region}"
-  droplet_id = "${digitalocean_droplet.home-vpn.id}"
+  region     = digitalocean_droplet.home-vpn.region
+  droplet_id = digitalocean_droplet.home-vpn.id
 }
 
 
 # The firewall is the most important part as we need to allow anyone access it from the same network
 # to work freely, anything outside the configured network should be heavily filtered 
 resource "digitalocean_firewall" "home-vpn" {
-  name = "Home VPN Firewall"
+  name = "home-vpn-firewall"
 
   droplet_ids = [
-    "${digitalocean_droplet.home-vpn.id}"
+    digitalocean_droplet.home-vpn.id
   ]
 
   # Inbound rules for the home VPN server
@@ -96,26 +96,30 @@ resource "digitalocean_firewall" "home-vpn" {
 
   inbound_rule {
     protocol         = "udp"
+    port_range       = "1-65535"
     source_addresses = ["10.0.0.0/8"]
   }
 
   inbound_rule {
     protocol         = "tcp"
+    port_range       = "1-65535"
     source_addresses = ["10.0.0.0/8"]
   }
 
   outbound_rule {
-    protocol               = "icmp"
-    destinations_addresses = ["10.0.0.0/8"]
+    protocol              = "icmp"
+    destination_addresses = ["10.0.0.0/8"]
   }
 
   outbound_rule {
-    protocol               = "udp"
-    destinations_addresses = ["10.0.0.0/8"]
+    protocol              = "udp"
+    port_range            = "1-65535"
+    destination_addresses = ["10.0.0.0/8"]
   }
 
   outbound_rule {
-    protocol               = "tcp"
-    destinations_addresses = ["10.0.0.0/8"]
+    protocol              = "tcp"
+    port_range            = "1-65535"
+    destination_addresses = ["10.0.0.0/8"]
   }
 }

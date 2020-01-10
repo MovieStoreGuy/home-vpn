@@ -6,6 +6,7 @@ RUN set -x && \
     apk add --no-cache \
         openldap \
         openldap-back-sql \
+        psqlodbc \
         openldap-overlay-auditlog \
         dumb-init && \
     addgroup -S slapd && \

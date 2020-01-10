@@ -14,13 +14,13 @@ services:
     ports:
       - '389:389'
     environment:
-      - LDAP_ROOT_DOMAIN="dc=moviestoreguy,dc=me"
-      - LDAP_ROOT_PASSWORD=derpderp
       - LOG_LEVEL=256
+      - DATABASE_SUFFIX="ou=contacts,dc=localhost"
       - DATABASE_HOST=backend-store
       - DATABASE_NAME=users
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=localdevpass
+    restart: on-failure
   database:
     image: postgres:12.1-alpine
     networks:

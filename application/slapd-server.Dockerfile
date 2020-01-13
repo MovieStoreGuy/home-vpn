@@ -12,6 +12,8 @@ RUN set -x && \
     addgroup -S slapd && \
     adduser  -S slapd -G slapd && \
     mkdir -p /user/slapd && \
+    touch /user/slapd/odbc.ini /user/slapd/odbcinst.ini && \
+    ln -sf /etc/odbc.ini /user/odbc.ini && \
     chown -R slapd:slapd /user/slapd && \
     set +x
 

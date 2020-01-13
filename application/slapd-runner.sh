@@ -62,6 +62,7 @@ readonly    ${DATABASE_RO:-off}
 lastmod     ${DATABASE_LAST_MOD:-off}
 
 EOF
+    [ $? -eq 0 ] && >&2 echo "[INFO] Successfully written slapd.conf" || exit 1
 else
     >&2 echo "[INFO] Using mounted file found at: $(pwd)/slapd.conf"
 fi

@@ -2,6 +2,56 @@
 
 set -eu
 
+# ODBC file instructions
+
+if [ ! -f /usr/local/lib/etc/odbc.ini ]; then
+    cat > /usr/local/lib/etc/odbc.ini << EOF
+;
+;  odbc.ini
+;
+[ODBC Data Sources]
+PgSQL=PostgreSQL
+
+[Users]
+Driver=/usr/lib/psqlodbcw.so
+Description=Connection to LDAP/POSTGRESQL
+Servername=${DATABASE_HOST}
+Port=${DATABASE_PORT}
+Protocol=6.4
+FetchBufferSize=99
+Username=${DATABASE_USER}
+Password=${DATABASE_PASSWORD}
+Database=Users
+ReadOnly=no
+Debug=1
+CommLog=1
+
+[ODBC]
+InstallDir=/usr/lib
+EOF
+else 
+    >&2 echo "[INFO] Using Using mounted file found at: /usr/local/lib/etc/odbc.ini"
+fi
+
+if [ ! -f /usr/local/lib/etc/odbcinst.ini ]; then
+    cat > /usr/local/lib/etc/odbcinst.ini << EOF
+;
+;  odbcinst.ini
+;
+[Users]
+Description=ODBC for PostgreSQL
+Driver=/usr/lib/psqlodbcw.so
+
+[ODBC]
+Trace=1
+Debug=1
+Pooling=No
+EOF
+else 
+    >&2 echo "[INFO] Using Using mounted file found at: /usr/local/lib/etc/odbcinst.ini"
+fi
+
+
 # Configure slapd based on environment provided config
 if [ ! -f slapd.conf ]; then
     cat > slapd.conf << EOF 
@@ -53,7 +103,7 @@ database    sql
 # User definition section
 
 suffix      ${DATABASE_SUFFIX}
-dbname      ${DATABASE_NAME}
+dbname      Users
 dbhost      ${DATABASE_HOST}
 dbuser      ${DATABASE_USER}
 dbpasswd    ${DATABASE_PASSWORD}

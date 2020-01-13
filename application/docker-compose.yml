@@ -17,6 +17,7 @@ services:
       - LOG_LEVEL=256
       - DATABASE_SUFFIX="ou=contacts,dc=localhost"
       - DATABASE_HOST=backend-store
+      - DATABASE_PORT=5432
       - DATABASE_NAME=users
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=localdevpass
@@ -39,6 +40,7 @@ services:
     - type: volume
       source: db-data
       target: /var/lib/postgresql/data/pgdata
+    restart: on-failure
 
 
 volumes:

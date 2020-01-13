@@ -11,10 +11,8 @@ RUN set -x && \
         dumb-init && \
     addgroup -S slapd && \
     adduser  -S slapd -G slapd && \
-    mkdir -p /user/slapd && \
-    touch /user/slapd/odbc.ini /user/slapd/odbcinst.ini && \
-    ln -sf /etc/odbc.ini /user/odbc.ini && \
-    chown -R slapd:slapd /user/slapd && \
+    mkdir -p /user/slapd  /usr/local/lib/etc && \
+    chown -R slapd:slapd  /user/slapd /usr/local/lib && \
     set +x
 
 WORKDIR /user/slapd

@@ -2,7 +2,7 @@
 
 set -eu
 
-# ODBC file instructions
+# ODBC file instructions can be found here: https://www.darold.net/projects/ldap_pg/HOWTO/x67.html
 
 if [ ! -f /usr/local/lib/etc/odbc.ini ]; then
     cat > /usr/local/lib/etc/odbc.ini << EOF
